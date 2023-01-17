@@ -16,6 +16,6 @@ CREATE TABLE users (
     email TEXT NOT NULL UNIQUE,
     password TEXT NOT NULL,
     sex TEXT,
-    date_joined TEXT NOT NULL
+    date_joined TEXT NOT NULL -- YYYY-MM-DD HH:MM:SS.SSS
 );
 ```
