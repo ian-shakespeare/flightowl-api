@@ -2,44 +2,67 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
+	"strings"
+	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
 type User struct {
-	id          int
-	first_name  string
-	last_name   string
-	email       string
-	password    string
-	sex         string
-	date_joined string
+	Id         int
+	FirstName  string
+	LastName   string
+	Email      string
+	Password   string
+	Sex        string
+	DateJoined string
 }
 
 const file string = "flightowl.db"
 
-func getUserByEmail(email string) (User, error) {
+func connectToDB() *sql.DB {
 	conn, err := sql.Open("sqlite3", file)
 	if err != nil {
-		panic("Error connecting to the database")
+		panic("Error: Could not connect to database")
 	}
+	return conn
+}
+
+func getUser(id int) (User, error) {
+	conn := connectToDB()
 	defer conn.Close()
 
-	rows, err := conn.Query(fmt.Sprintf("SELECT * FROM users WHERE email = '%s';", email))
+	rows, err := conn.Query("SELECT * FROM users WHERE id = ?;", id)
 	if err != nil {
-		panic("Error accessing row")
+		return User{}, err
 	}
 	defer rows.Close()
 
 	user := User{}
 
 	if rows.Next() {
-		err = rows.Scan(&user.id, &user.first_name, &user.last_name, &user.email, &user.password, &user.sex, &user.date_joined)
+		err = rows.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.Password, &user.Sex, &user.DateJoined)
 		if err != nil {
-			panic("Could not find user")
+			return User{}, err
 		}
 	}
-	fmt.Printf("%s\n", user.first_name)
-	return user, err
+
+	return user, nil
+}
+
+func createUser(firstName string, lastName string, email string, password string, sex string) (int64, error) {
+	currentTime := strings.Split(time.Now().String(), " +")[0]
+	conn := connectToDB()
+	defer conn.Close()
+
+	res, err := conn.Exec("INSERT INTO users VALUES('?', '?', '?', '?', '?', '?')", firstName, lastName, email, password, sex, currentTime)
+	if err != nil {
+		return 0, err
+	}
+
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
 }
