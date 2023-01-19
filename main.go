@@ -4,12 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+
+	"flightowl.app/api/server"
 )
 
 func main() {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/users", handleUsers)
-	mux.HandleFunc("/flights", handleFlights)
+	mux.HandleFunc("/", server.AssignRoutes)
 
 	port := "8000"
 

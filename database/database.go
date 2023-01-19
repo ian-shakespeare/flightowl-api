@@ -1,10 +1,10 @@
-package main
+package database
 
 import (
 	"database/sql"
-	"strings"
 	"time"
 
+	"flightowl.app/api/helpers"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -28,7 +28,7 @@ func connectToDB() *sql.DB {
 	return conn
 }
 
-func getUser(id int) (User, error) {
+func GetUser(id int) (User, error) {
 	conn := connectToDB()
 	defer conn.Close()
 
@@ -50,12 +50,15 @@ func getUser(id int) (User, error) {
 	return user, nil
 }
 
-func createUser(firstName string, lastName string, email string, password string, sex string) (int64, error) {
-	currentTime := strings.Split(time.Now().String(), " +")[0]
+func CreateUser(firstName string, lastName string, email string, password string, sex string) (int64, error) {
+	currentTime := helpers.GetFormattedTime(time.Now())
 	conn := connectToDB()
 	defer conn.Close()
 
-	res, err := conn.Exec("INSERT INTO users VALUES('?', '?', '?', '?', '?', '?')", firstName, lastName, email, password, sex, currentTime)
+	res, err := conn.Exec(`
+		INSERT INTO users (first_name, last_name, email, password, sex, date_joined)
+		VALUES(?, ?, ?, ?, ?, ?);
+		`, firstName, lastName, email, password, sex, currentTime)
 	if err != nil {
 		return 0, err
 	}
