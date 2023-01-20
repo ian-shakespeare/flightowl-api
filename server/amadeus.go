@@ -21,8 +21,8 @@ type AccessToken struct {
 	timeReceived int64
 }
 
-const apiKey = "DpmFXGUt7EDDDYfAszCr6GmMzTj6F7Cn"
-const apiSecret = "oSwNJvDz9GuBVrUj"
+// const apiKey = ""
+// const apiSecret = ""
 const baseURL = "https://test.api.amadeus.com"
 
 var accessToken = AccessToken{"", 0, 0}
