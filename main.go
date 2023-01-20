@@ -3,16 +3,12 @@ package main
 import (
 	"errors"
 	"fmt"
-	"math/rand"
 	"net/http"
-	"time"
 
 	"flightowl.app/api/server"
 )
 
 func main() {
-	rand.Seed(time.Now().UnixNano())
-
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", server.AssignRoutes)
 

@@ -9,7 +9,7 @@ import (
 	"flightowl.app/api/helpers"
 )
 
-type AuthFields struct {
+type Credentials struct {
 	Email    string
 	Password string
 }
@@ -32,20 +32,6 @@ func getAllUsers(w http.ResponseWriter, r *http.Request) {
 	handleOK(w)
 }
 
-// func getUser(w http.ResponseWriter, r *http.Request) {
-// 	id := helpers.GetPathResource(r.URL.Path)
-
-// 	user, err := database.SelectUser(id)
-// 	if err != nil {
-// 		handleError(w, "user not found", 404)
-// 		return
-// 	}
-
-// 	w.Header().Set("Content-Type", "application/json")
-// 	json.NewEncoder(w).Encode(user)
-// 	logSuccess(200)
-// }
-
 func createUser(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -66,7 +52,11 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sessionId := createSession(id)
-	writeCookie(w, "sessionId", sessionId)
+	cookie := http.Cookie{
+		Name:  "sessionId",
+		Value: sessionId,
+	}
+	http.SetCookie(w, &cookie)
 
 	handleCreated(w)
 }
@@ -78,7 +68,7 @@ func authenticateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var credentials AuthFields
+	var credentials Credentials
 	err = json.Unmarshal(body, &credentials)
 	if err != nil {
 		handleBadRequest(w)
@@ -97,7 +87,11 @@ func authenticateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sessionId := createSession(user.Id)
-	writeCookie(w, "sessionId", sessionId)
+	cookie := http.Cookie{
+		Name:  "sessionId",
+		Value: sessionId,
+	}
+	http.SetCookie(w, &cookie)
 
 	handleCreated(w)
 }

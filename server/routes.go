@@ -22,46 +22,6 @@ var routes = []route{
 	{"POST", "/sessions", authenticateUser},
 }
 
-func handleNotFound(w http.ResponseWriter) {
-	fmt.Printf("- 404\n")
-	w.WriteHeader(http.StatusNotFound)
-}
-
-func handleBadRequest(w http.ResponseWriter) {
-	fmt.Printf("- 400\n")
-	w.WriteHeader(http.StatusBadRequest)
-}
-
-func handleUnauthorized(w http.ResponseWriter) {
-	fmt.Printf("- 401\n")
-	w.WriteHeader(http.StatusUnauthorized)
-}
-
-func handleOK(w http.ResponseWriter) {
-	fmt.Printf("- 200\n")
-}
-
-func handleCreated(w http.ResponseWriter) {
-	fmt.Printf("- 201\n")
-	w.WriteHeader(http.StatusCreated)
-}
-
-func writeCookie(w http.ResponseWriter, name string, value string) {
-	cookie := http.Cookie{
-		Name:  name,
-		Value: value,
-	}
-	http.SetCookie(w, &cookie)
-}
-
-func readCookie(r *http.Request, key string) (string, error) {
-	cookie, err := r.Cookie(key)
-	if err != nil {
-		return "", errors.New("cookie not found")
-	}
-	return cookie.Value, nil
-}
-
 func filterRoutesByMethod(r []route, method string) ([]route, error) {
 	var filteredRoutes = []route{}
 

@@ -12,19 +12,20 @@ import (
 var sessionStore = map[string]string{}
 
 func createSessionId() string {
-	return helpers.GetRandomString(8)
+	return helpers.GetRandomString(16)
 }
 
 func loadSession(r *http.Request) (int64, error) {
 	if len(sessionStore) < 1 {
 		return 0, errors.New("session store empty")
 	}
-	sessionId, err := readCookie(r, "sessionId")
+
+	sessionId, err := r.Cookie("sessionId")
 	if err != nil {
 		return 0, err
 	}
 
-	sessionData := sessionStore[sessionId]
+	sessionData := sessionStore[sessionId.Value]
 	if sessionData == "" {
 		return 0, errors.New("could not find sessionId")
 	}

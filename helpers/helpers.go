@@ -1,8 +1,8 @@
 package helpers
 
 import (
+	"crypto/rand"
 	"crypto/sha256"
-	"math/rand"
 	"strconv"
 	"strings"
 	"time"
@@ -48,11 +48,13 @@ func HashString(s string) string {
 	return newStr
 }
 
-func GetRandomString(length int) string {
+func GetRandomString(length uint8) string {
 	letters := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	buf := make([]byte, length)
+	rand.Read(buf)
 	s := make([]rune, length)
 	for i := range s {
-		s[i] = letters[rand.Intn(len(letters))]
+		s[i] = letters[uint8(buf[i])%length]
 	}
 	return string(s)
 }
