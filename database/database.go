@@ -9,7 +9,7 @@ import (
 )
 
 type User struct {
-	Id         int
+	Id         int64
 	FirstName  string
 	LastName   string
 	Email      string
@@ -22,35 +22,59 @@ const file string = "flightowl.db"
 
 func connectToDB() *sql.DB {
 	conn, err := sql.Open("sqlite3", file)
+
 	if err != nil {
-		panic("Error: Could not connect to database")
+		panic("could not connect to database")
 	}
+
 	return conn
 }
 
-func GetUser(id int) (User, error) {
+func SelectAllUsers() ([]User, error) {
 	conn := connectToDB()
 	defer conn.Close()
 
-	rows, err := conn.Query("SELECT * FROM users WHERE id = ?;", id)
+	rows, err := conn.Query("SELECT * FROM users;")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	users := []User{}
+	for rows.Next() {
+		user := User{}
+		err = rows.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.Password, &user.Sex, &user.DateJoined)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+
+	return users, nil
+}
+
+func SelectUser(email string) (User, error) {
+	conn := connectToDB()
+	defer conn.Close()
+
+	rows, err := conn.Query("SELECT * FROM users WHERE email = ?;", email)
 	if err != nil {
 		return User{}, err
 	}
 	defer rows.Close()
 
 	user := User{}
-
 	if rows.Next() {
 		err = rows.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.Password, &user.Sex, &user.DateJoined)
 		if err != nil {
-			return User{}, err
+			panic("could not get user from database")
 		}
 	}
 
 	return user, nil
 }
 
-func CreateUser(firstName string, lastName string, email string, password string, sex string) (int64, error) {
+func InsertUser(firstName string, lastName string, email string, password string, sex string) (int64, error) {
 	currentTime := helpers.GetFormattedTime(time.Now())
 	conn := connectToDB()
 	defer conn.Close()
@@ -60,12 +84,13 @@ func CreateUser(firstName string, lastName string, email string, password string
 		VALUES(?, ?, ?, ?, ?, ?);
 		`, firstName, lastName, email, password, sex, currentTime)
 	if err != nil {
-		return 0, err
+		panic("could not insert user into databse")
 	}
 
 	id, err := res.LastInsertId()
 	if err != nil {
-		return 0, err
+		panic("could not get id of inserted user")
 	}
+
 	return id, nil
 }
