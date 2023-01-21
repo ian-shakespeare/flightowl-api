@@ -5,6 +5,7 @@ By Ian Shakespeare
 ## Requirements
 
 - SQLite3
+- `apiKey` and `apiSecret` environment variables
 
 ## Schema
 
