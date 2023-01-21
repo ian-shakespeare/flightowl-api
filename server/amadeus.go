@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -20,6 +21,38 @@ type AccessToken struct {
 	token        string
 	duration     int64
 	timeReceived int64
+}
+
+type LocationDate struct {
+	IATACode string `json:"iataCode"`
+	Terminal string `json:"terminal"`
+	At       string `json:"at"`
+}
+
+type Segment struct {
+	Departure    LocationDate `json:"departure"`
+	Arrival      LocationDate `json:"arrival"`
+	CarrierCode  string       `json:"carrierCode"`
+	FlightNumber string       `json:"number"`
+	OperatedBy   struct {
+		CarrierCode string `json:"CarrierCode"`
+	} `json:"operating"`
+}
+
+type Itinerary struct {
+	Duration string    `json:"duration"`
+	Segments []Segment `json:"segments"`
+}
+
+type Offer struct {
+	OneWay            bool        `json:"oneWay"`
+	LastTicketingDate string      `json:"lastTicketingDate"`
+	AvailableSeats    int         `json:"numberOfBookableSeats"`
+	Itineraries       []Itinerary `json:"itineraries"`
+}
+
+type FlightOffersResponse struct {
+	Offers []Offer `json:"data"`
 }
 
 const baseURL = "https://test.api.amadeus.com"
@@ -52,35 +85,61 @@ func retrieveAccessToken(token *AccessToken) error {
 		return err
 	}
 
-	resBody, err := io.ReadAll(res.Body)
+	rawResBody, err := io.ReadAll(res.Body)
 	if err != nil {
 		return err
 	}
 
-	var rawResBody AuthResponse
-	err = json.Unmarshal(resBody, &rawResBody)
+	var resBody AuthResponse
+	err = json.Unmarshal(rawResBody, &resBody)
 	if err != nil {
 		return err
 	}
-	token.token = rawResBody.AccessToken
-	token.duration = rawResBody.ExpiresIn
+	token.token = resBody.AccessToken
+	token.duration = resBody.ExpiresIn
 	token.timeReceived = time.Now().Unix()
 
 	return nil
 }
 
-func GetFlightOffers(originCode string, destinationCode string, departureDate string, numOfAdults int) error {
+func getFlightOffers(originCode string, destinationCode string, departureDate string, numOfAdults int) ([]Offer, error) {
 	if isTokenExpired(&accessToken) {
 		retrieveAccessToken(&accessToken)
 	}
 
 	resourseURL := "/v2/shopping/flight-offers"
-	queryParameters := fmt.Sprintf("?originLocationCode=%s&destinationLocationCode%s&departureDate=%s&adults=%d&currencyCode=USD")
+	queryParameters := fmt.Sprintf(
+		"?originLocationCode=%s&destinationLocationCode=%s&departureDate=%s&adults=%d&currencyCode=USD",
+		originCode, destinationCode, departureDate, numOfAdults)
 	requestURL := baseURL + resourseURL + queryParameters
 
 	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
 	if err != nil {
-		return err
+		return nil, errors.New("bad request")
 	}
-	req.Header.Set("Authorization", accessToken.token)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", accessToken.token))
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, errors.New("bad request")
+	}
+
+	rawResBody, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, errors.New("bad request")
+	}
+
+	var resBody FlightOffersResponse
+	err = json.Unmarshal(rawResBody, &resBody)
+	if err != nil {
+		return nil, errors.New("bad request")
+	}
+
+	offers := resBody.Offers
+	if len(offers) < 1 {
+		return nil, errors.New("not found")
+	} else if len(offers) < 5 {
+		return offers[:3], nil
+	}
+	return offers[:5], nil
 }

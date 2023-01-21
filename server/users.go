@@ -36,6 +36,7 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		handleBadRequest(w)
+		return
 	}
 
 	var user database.User
