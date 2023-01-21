@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 )
@@ -21,17 +22,17 @@ type AccessToken struct {
 	timeReceived int64
 }
 
-// const apiKey = ""
-// const apiSecret = ""
 const baseURL = "https://test.api.amadeus.com"
 
+var apiKey = os.Getenv("apiKey")
+var apiSecret = os.Getenv("apiSecret")
 var accessToken = AccessToken{"", 0, 0}
 
 func isTokenExpired(token *AccessToken) bool {
 	return time.Now().Unix() > token.duration+token.timeReceived
 }
 
-func getAccessToken() error {
+func retrieveAccessToken(token *AccessToken) error {
 	requestURL := baseURL + "/v1/security/oauth2/token"
 
 	formBody := url.Values{}
@@ -61,16 +62,16 @@ func getAccessToken() error {
 	if err != nil {
 		return err
 	}
-	accessToken.token = rawResBody.AccessToken
-	accessToken.duration = rawResBody.ExpiresIn
-	accessToken.timeReceived = time.Now().Unix()
+	token.token = rawResBody.AccessToken
+	token.duration = rawResBody.ExpiresIn
+	token.timeReceived = time.Now().Unix()
 
 	return nil
 }
 
 func GetFlightOffers(originCode string, destinationCode string, departureDate string, numOfAdults int) error {
 	if isTokenExpired(&accessToken) {
-		getAccessToken()
+		retrieveAccessToken(&accessToken)
 	}
 
 	resourseURL := "/v2/shopping/flight-offers"
