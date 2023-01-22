@@ -2,7 +2,7 @@ name: Run Tests
 
 on: [push]
 jobs:
-  RunServer:
+  RunEndToEndTests:
     runs-on: ubuntu-latest
     env:
       API_KEY: ${{ secrets.API_KEY }}
@@ -12,11 +12,7 @@ jobs:
     - name: Build Docker image
       run: docker build . --file Dockerfile --tag arcticstorm9/flightowl-api
     - name: Run server
-      run: docker run -p 8000:8000
-  RunTests:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
+      run: docker run arcticstorm9/flightowl-api -p 8000:8000
     - name: Install Dependencies
       run: pip install -r tests/requirements.txt
     - name: Run pytest
