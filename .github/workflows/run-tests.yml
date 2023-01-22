@@ -2,7 +2,7 @@ name: Run Tests
 
 on: [push]
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     env:
       API_KEY: ${{ secrets.API_KEY }}
@@ -16,4 +16,4 @@ jobs:
     - name: Install Dependencies
       run: pip install -r tests/requirements.txt
     - name: Run pytest
-      run: pytest --color=yes tests/test_users_route.py
+      run: pytest --spec --color=yes tests/

@@ -1,17 +1,17 @@
 import pytest
 import sqlite3
 import requests
-import sys
-
-sys.path.append('../')
 
 USERS_URL = 'http://localhost:8000/users'
 SESSIONS_URL = 'http://localhost:8000/sessions'
 
+# @pytest.fixture(scope="session", autouse=True)
+# def create_t
+
 @pytest.fixture
 def delete_test_user():
     yield
-    conn = sqlite3.connect("../flightowl.db")
+    conn = sqlite3.connect("flightowl.db")
     cursor = conn.cursor()
     cursor.execute("DELETE FROM users WHERE email = 'test@email.com';")
     conn.commit()
