@@ -5,8 +5,25 @@ import requests
 USERS_URL = 'http://localhost:8000/users'
 SESSIONS_URL = 'http://localhost:8000/sessions'
 
-# @pytest.fixture(scope="session", autouse=True)
-# def create_t
+# TEMPORARY SOLUTION, DELETING SHOULD BE DONE BY THE SERVER
+@pytest.fixture(scope="session", autouse=True)
+def create_table():
+    conn = sqlite3.connect("flightowl.db")
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS users (
+			id INTEGER PRIMARY KEY,
+			first_name TEXT NOT NULL,
+			last_name TEXT NOT NULL,
+			email TEXT NOT NULL UNIQUE,
+			password TEXT NOT NULL,
+			sex TEXT,
+			date_joined TEXT NOT NULL,
+			admin INTEGER DEFAULT 0 NOT NULL
+		);
+        """
+    )
 
 @pytest.fixture
 def delete_test_user():
