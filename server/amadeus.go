@@ -57,8 +57,8 @@ type FlightOffersResponse struct {
 
 const baseURL = "https://test.api.amadeus.com"
 
-var apiKey = os.Getenv("apiKey")
-var apiSecret = os.Getenv("apiSecret")
+var apiKey = os.Getenv("API_KEY")
+var apiSecret = os.Getenv("API_SECRET")
 var accessToken = AccessToken{"", 0, 0}
 
 func isTokenExpired(token *AccessToken) bool {

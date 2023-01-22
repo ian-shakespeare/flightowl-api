@@ -4,8 +4,9 @@ By Ian Shakespeare
 
 ## Requirements
 
+- Go v1.19 or later
 - SQLite3
-- `apiKey` and `apiSecret` environment variables
+- `.env` with `apiKey` and `apiSecret` fields
 
 ## Schema
 

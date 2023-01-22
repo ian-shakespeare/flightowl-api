@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"flightowl.app/api/helpers"
+	"github.com/arcticstorm9/flightowl-api/helpers"
 )
 
 var sessionStore = map[string]string{}

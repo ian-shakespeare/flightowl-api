@@ -44,6 +44,8 @@ func getFlights(w http.ResponseWriter, r *http.Request) {
 		case "not found":
 			handleNotFound(w)
 			return
+		default:
+			panic(err)
 		}
 	}
 

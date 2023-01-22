@@ -2,11 +2,12 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 
-	"flightowl.app/api/database"
-	"flightowl.app/api/helpers"
+	"github.com/arcticstorm9/flightowl-api/database"
+	"github.com/arcticstorm9/flightowl-api/helpers"
 )
 
 type Credentials struct {
@@ -49,7 +50,13 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 
 	id, err := database.InsertUser(user.FirstName, user.LastName, user.Email, user.Password, user.Sex)
 	if err != nil {
-		panic(err)
+		switch err.Error() {
+		case "conflict":
+			handleConflict(w)
+			return
+		default:
+			panic(err)
+		}
 	}
 
 	sessionId := createSession(id)
@@ -78,6 +85,7 @@ func authenticateUser(w http.ResponseWriter, r *http.Request) {
 
 	user, err := database.SelectUser(credentials.Email)
 	if err != nil {
+		fmt.Println(err)
 		handleNotFound(w)
 		return
 	}

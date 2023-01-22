@@ -20,6 +20,11 @@ func handleUnauthorized(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusUnauthorized)
 }
 
+func handleConflict(w http.ResponseWriter) {
+	fmt.Printf("- 409\n")
+	w.WriteHeader(http.StatusConflict)
+}
+
 func handleOK(w http.ResponseWriter) {
 	fmt.Printf("- 200\n")
 }

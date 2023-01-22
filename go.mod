@@ -1,4 +1,4 @@
-module flightowl.app/api
+module github.com/arcticstorm9/flightowl-api
 
 go 1.19
 

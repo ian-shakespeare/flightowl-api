@@ -2,9 +2,10 @@ package database
 
 import (
 	"database/sql"
+	"errors"
 	"time"
 
-	"flightowl.app/api/helpers"
+	"github.com/arcticstorm9/flightowl-api/helpers"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -16,6 +17,7 @@ type User struct {
 	Password   string
 	Sex        string
 	DateJoined string
+	Admin      int64
 }
 
 const file string = "flightowl.db"
@@ -28,6 +30,29 @@ func connectToDB() *sql.DB {
 	}
 
 	return conn
+}
+
+func Init() error {
+	conn := connectToDB()
+	defer conn.Close()
+
+	_, err := conn.Exec(`
+		CREATE TABLE IF NOT EXISTS users (
+			id INTEGER PRIMARY KEY,
+			first_name TEXT NOT NULL,
+			last_name TEXT NOT NULL,
+			email TEXT NOT NULL UNIQUE,
+			password TEXT NOT NULL,
+			sex TEXT,
+			date_joined TEXT NOT NULL,
+			admin INTEGER DEFAULT 0 NOT NULL
+		);
+	`)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func SelectAllUsers() ([]User, error) {
@@ -43,7 +68,7 @@ func SelectAllUsers() ([]User, error) {
 	users := []User{}
 	for rows.Next() {
 		user := User{}
-		err = rows.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.Password, &user.Sex, &user.DateJoined)
+		err = rows.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.Password, &user.Sex, &user.DateJoined, &user.Admin)
 		if err != nil {
 			return nil, err
 		}
@@ -65,10 +90,14 @@ func SelectUser(email string) (User, error) {
 
 	user := User{}
 	if rows.Next() {
-		err = rows.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.Password, &user.Sex, &user.DateJoined)
+		err = rows.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.Password, &user.Sex, &user.DateJoined, &user.Admin)
 		if err != nil {
-			panic("could not get user from database")
+			return User{}, errors.New("not found")
 		}
+	}
+
+	if user.Email != email {
+		return User{}, errors.New("not found")
 	}
 
 	return user, nil
@@ -82,9 +111,9 @@ func InsertUser(firstName string, lastName string, email string, password string
 	res, err := conn.Exec(`
 		INSERT INTO users (first_name, last_name, email, password, sex, date_joined)
 		VALUES(?, ?, ?, ?, ?, ?);
-		`, firstName, lastName, email, password, sex, currentTime)
+	`, firstName, lastName, email, password, sex, currentTime)
 	if err != nil {
-		panic("could not insert user into databse")
+		return 0, errors.New("conflict")
 	}
 
 	id, err := res.LastInsertId()
