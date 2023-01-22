@@ -12,7 +12,7 @@ jobs:
     - name: Build Docker image
       run: docker build . --file Dockerfile --tag arcticstorm9/flightowl-api
     - name: Run server
-      run: docker run arcticstorm9/flightowl-api -p 8000:8000
+      run: docker run -p 8000:8000 arcticstorm9/flightowl-api
     - name: Install Dependencies
       run: pip install -r tests/requirements.txt
     - name: Run pytest
