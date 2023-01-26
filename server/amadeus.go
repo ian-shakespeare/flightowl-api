@@ -18,7 +18,7 @@ type AuthResponse struct {
 }
 
 type AccessToken struct {
-	token        string
+	value        string
 	duration     int64
 	timeReceived int64
 }
@@ -95,7 +95,7 @@ func retrieveAccessToken(token *AccessToken) error {
 	if err != nil {
 		return err
 	}
-	token.token = resBody.AccessToken
+	token.value = resBody.AccessToken
 	token.duration = resBody.ExpiresIn
 	token.timeReceived = time.Now().Unix()
 
@@ -117,7 +117,7 @@ func getFlightOffers(originCode string, destinationCode string, departureDate st
 	if err != nil {
 		return nil, errors.New("bad request")
 	}
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", accessToken.token))
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", accessToken.value))
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {

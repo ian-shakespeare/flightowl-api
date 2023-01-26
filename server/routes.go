@@ -21,6 +21,7 @@ var routes = []route{
 	{"GET", "/flights", getFlights},
 	{"POST", "/users", createUser},
 	{"POST", "/sessions", authenticateUser},
+	{"DELETE", "/tests", deleteTestUser},
 }
 
 func filterRoutesByMethod(r []route, method string) ([]route, error) {
@@ -41,6 +42,10 @@ func filterRoutesByMethod(r []route, method string) ([]route, error) {
 func pathsMatch(target string, candidate string) bool {
 	tarElements := strings.Split(target, "/")
 	canElements := strings.Split(candidate, "/")
+
+	if len(tarElements) != len(canElements) {
+		return false
+	}
 
 	for i, value := range tarElements {
 		if !helpers.Includes(canElements[i], ":") && value != canElements[i] {

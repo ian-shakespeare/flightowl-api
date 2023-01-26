@@ -123,3 +123,18 @@ func InsertUser(firstName string, lastName string, email string, password string
 
 	return id, nil
 }
+
+func DeleteTestUser() error {
+	conn := connectToDB()
+	defer conn.Close()
+
+	_, err := conn.Exec(`
+		DELETE FROM users
+		WHERE email = 'test@email.com';
+	`)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
