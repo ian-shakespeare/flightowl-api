@@ -18,7 +18,7 @@ const baseURL = "https://test.api.amadeus.com"
 
 var apiKey = os.Getenv("API_KEY")
 var apiSecret = os.Getenv("API_SECRET")
-var accessToken = types.AccessToken{"", 0, 0}
+var accessToken = types.AccessToken{Value: "", Duration: 0, TimeReceived: 0}
 
 func isTokenExpired(token *types.AccessToken) bool {
 	return time.Now().Unix() > token.Duration+token.TimeReceived
