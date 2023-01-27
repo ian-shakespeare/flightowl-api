@@ -8,6 +8,7 @@ import (
 
 	"github.com/arcticstorm9/flightowl-api/database"
 	"github.com/arcticstorm9/flightowl-api/helpers"
+	"github.com/arcticstorm9/flightowl-api/types"
 )
 
 type Credentials struct {
@@ -40,7 +41,7 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var user database.User
+	var user types.User
 	err = json.Unmarshal(body, &user)
 	if err != nil {
 		handleBadRequest(w)
@@ -95,7 +96,7 @@ func authenticateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sessionId := createSession(user.Id)
+	sessionId := createSession(user.UserId)
 	cookie := http.Cookie{
 		Name:  "sessionId",
 		Value: sessionId,

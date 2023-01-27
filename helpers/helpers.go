@@ -58,3 +58,13 @@ func GetRandomString(length uint8) string {
 	}
 	return string(s)
 }
+
+func ClearWhiteSpace(word string) string {
+	var newWord []rune
+	for _, c := range word {
+		if string(c) != " " && string(c) != "\n" {
+			newWord = append(newWord, c)
+		}
+	}
+	return string(newWord)
+}

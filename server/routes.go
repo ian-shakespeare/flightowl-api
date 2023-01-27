@@ -19,8 +19,10 @@ type route struct {
 var routes = []route{
 	{"GET", "/users", getAllUsers},
 	{"GET", "/flights", getFlights},
+	{"GET", "/flights/saved", getSavedFlights},
 	{"POST", "/users", createUser},
 	{"POST", "/sessions", authenticateUser},
+	{"POST", "/flights", saveFlight},
 	{"DELETE", "/tests", deleteTestUser},
 }
 
