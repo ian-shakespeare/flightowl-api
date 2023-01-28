@@ -95,3 +95,48 @@ func getSavedFlights(w http.ResponseWriter, r *http.Request) {
 
 	handleOK(w)
 }
+
+func checkSavedFlight(w http.ResponseWriter, r *http.Request) {
+	id, err := loadSession(r)
+	if err != nil {
+		handleUnauthorized(w)
+		return
+	}
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		handleBadRequest(w)
+		return
+	}
+
+	var bodyJSON struct {
+		OfferId int64 `json:"offerId"`
+	}
+	err = json.Unmarshal(body, &bodyJSON)
+	if err != nil {
+		handleBadRequest(w)
+		return
+	}
+
+	previousOffer, err := database.SelectFlightOffer(bodyJSON.OfferId, id)
+	if err != nil {
+		handleBadRequest(w)
+		return
+	}
+
+	currentOffer, err := getUpdatedFlightOffer(previousOffer)
+	if err != nil {
+		switch err.Error() {
+		case "not found":
+			handleNotFound(w)
+		default:
+			handleBadRequest(w)
+		}
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(currentOffer)
+
+	handleOK(w)
+}

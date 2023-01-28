@@ -182,3 +182,28 @@ func SelectFlightOffers(user_id int64) ([]types.StoredOffer, error) {
 
 	return offers, nil
 }
+
+func SelectFlightOffer(offer_id int64, user_id int64) (types.Offer, error) {
+	conn := connectToDB()
+	defer conn.Close()
+
+	rows, err := conn.Query(
+		"SELECT * FROM flight_offers WHERE offer_id = ? AND user_id = ?;",
+		offer_id, user_id)
+	if err != nil {
+		return types.Offer{}, err
+	}
+	defer rows.Close()
+
+	storedOffer := types.StoredOffer{}
+	if rows.Next() {
+		var rawOfferData string
+		err = rows.Scan(&storedOffer.OfferId, &storedOffer.DateSaved, &rawOfferData, &storedOffer.UserId)
+
+		var offerData types.FlightOfferData
+		json.Unmarshal([]byte(rawOfferData), &offerData)
+		storedOffer.FlightOffer = offerData
+	}
+
+	return storedOffer.FlightOffer.Data, nil
+}

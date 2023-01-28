@@ -20,6 +20,7 @@ var routes = []route{
 	{"GET", "/users", getAllUsers},
 	{"GET", "/flights", getFlights},
 	{"GET", "/flights/saved", getSavedFlights},
+	{"GET", "/flights/check", checkSavedFlight},
 	{"POST", "/users", createUser},
 	{"POST", "/sessions", authenticateUser},
 	{"POST", "/flights", saveFlight},

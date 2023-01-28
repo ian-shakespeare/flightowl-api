@@ -119,3 +119,10 @@ type FlightOffersResponse struct {
 type FlightOfferData struct {
 	Data Offer `json:"data"`
 }
+
+type FlightOfferPrice struct {
+	Data struct {
+		Type         string  `json:"type"`
+		FlightOffers []Offer `json:"flightOffers"`
+	} `json:"data"`
+}
