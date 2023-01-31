@@ -30,7 +30,7 @@ func Init() error {
 	_, err := conn.Exec(`
 		CREATE TABLE IF NOT EXISTS users
 		(
-			user_id INTEGER PRIMARY KEY,
+			id INTEGER PRIMARY KEY,
 			first_name TEXT NOT NULL,
 			last_name TEXT NOT NULL,
 			email TEXT NOT NULL UNIQUE,
