@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -120,12 +121,12 @@ func getUpdatedFlightOffer(previousOffer types.Offer) (types.Offer, error) {
 		return types.Offer{}, errors.New("bad request")
 	}
 
-	req, err := http.NewRequest(http.MethodPost, requestURL, strings.NewReader(string(reqBody)))
+	req, err := http.NewRequest(http.MethodPost, requestURL, bytes.NewBuffer(reqBody))
 	if err != nil {
 		return types.Offer{}, errors.New("bad request")
 	}
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", accessToken.Value))
-	req.Header.Set("X-HTTP-Method-Override", "GET")
+	req.Header.Set("Content-Type", "application/json")
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -144,7 +145,7 @@ func getUpdatedFlightOffer(previousOffer types.Offer) (types.Offer, error) {
 	}
 
 	if len(resBody.Data.FlightOffers) < 1 {
-		return types.Offer{}, errors.New("bad request")
+		return types.Offer{}, errors.New("not found")
 	}
 
 	return resBody.Data.FlightOffers[0], nil

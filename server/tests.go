@@ -46,3 +46,30 @@ func deleteTestUser(w http.ResponseWriter, r *http.Request) {
 
 	handleOK(w)
 }
+
+func deleteTestFlight(w http.ResponseWriter, r *http.Request) {
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		handleBadRequest(w)
+		return
+	}
+
+	var cred TestCredentials
+	err = json.Unmarshal(body, &cred)
+	if err != nil {
+		handleBadRequest(w)
+		return
+	}
+
+	if !checkToken(cred.Token) {
+		handleUnauthorized(w)
+		return
+	}
+
+	err = database.DeleteTestFlight()
+	if err != nil {
+		panic("could not delete test flight")
+	}
+
+	handleOK(w)
+}

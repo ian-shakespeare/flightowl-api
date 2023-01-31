@@ -44,7 +44,7 @@ type Segment struct {
 		Code string `json:"code"`
 	} `json:"aircraft"`
 	OperatedBy struct {
-		CarrierCode string `json:"CarrierCode"`
+		CarrierCode string `json:"carrierCode"`
 	} `json:"operating"`
 	Duration    string `json:"duration"`
 	Id          string `json:"id"`

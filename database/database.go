@@ -35,7 +35,7 @@ func Init() error {
 			last_name TEXT NOT NULL,
 			email TEXT NOT NULL UNIQUE,
 			password TEXT NOT NULL,
-			sex TEXT,
+			sex TEXT NOT NULL,
 			date_joined TEXT NOT NULL,
 			admin INTEGER DEFAULT 0 NOT NULL
 		);
@@ -45,7 +45,8 @@ func Init() error {
 			date_saved TEXT NOT NULL,
 			offer TEXT NOT NULL,
 			user_id INTEGER NOT NULL,
-			FOREIGN KEY (user_id) REFERENCES users(user_id)
+			FOREIGN KEY (user_id) REFERENCES users(id)
+				ON DELETE CASCADE
 		);
 	`)
 	if err != nil {
@@ -199,6 +200,9 @@ func SelectFlightOffer(offer_id int64, user_id int64) (types.Offer, error) {
 	if rows.Next() {
 		var rawOfferData string
 		err = rows.Scan(&storedOffer.OfferId, &storedOffer.DateSaved, &rawOfferData, &storedOffer.UserId)
+		if err != nil {
+			return types.Offer{}, err
+		}
 
 		var offerData types.FlightOfferData
 		json.Unmarshal([]byte(rawOfferData), &offerData)
@@ -206,4 +210,20 @@ func SelectFlightOffer(offer_id int64, user_id int64) (types.Offer, error) {
 	}
 
 	return storedOffer.FlightOffer.Data, nil
+}
+
+func DeleteTestFlight() error {
+	conn := connectToDB()
+	defer conn.Close()
+
+	_, err := conn.Exec(`
+		DELETE FROM flights
+		JOIN users ON flights.user_id = users.id
+		WHERE email = 'test@email.com';
+	`)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
