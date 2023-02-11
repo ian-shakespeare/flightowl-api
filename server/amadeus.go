@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/arcticstorm9/flightowl-api/types"
+	"flightowl-api/types"
 )
 
 const baseURL = "https://test.api.amadeus.com"

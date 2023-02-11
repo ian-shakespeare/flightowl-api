@@ -4,20 +4,22 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
-	"github.com/arcticstorm9/flightowl-api/helpers"
-	"github.com/arcticstorm9/flightowl-api/types"
-	_ "github.com/mattn/go-sqlite3"
+	"flightowl-api/helpers"
+	"flightowl-api/types"
+
+	_ "github.com/lib/pq"
 )
 
-const file string = "flightowl.db"
-
 func connectToDB() *sql.DB {
-	conn, err := sql.Open("sqlite3", file)
+	dbURL := helpers.GetRequiredEnv("DB_URL")
 
+	conn, err := sql.Open("postgres", dbURL)
 	if err != nil {
-		panic("could not connect to database")
+		fmt.Println("could not connect to database")
+		panic(err)
 	}
 
 	return conn
@@ -30,7 +32,7 @@ func Init() error {
 	_, err := conn.Exec(`
 		CREATE TABLE IF NOT EXISTS users
 		(
-			id INTEGER PRIMARY KEY,
+			id SERIAL PRIMARY KEY,
 			first_name TEXT NOT NULL,
 			last_name TEXT NOT NULL,
 			email TEXT NOT NULL UNIQUE,
@@ -41,7 +43,7 @@ func Init() error {
 		);
 		CREATE TABLE IF NOT EXISTS flight_offers
 		(
-			offer_id INTEGER PRIMARY KEY,
+			offer_id SERIAL PRIMARY KEY,
 			date_saved TEXT NOT NULL,
 			offer TEXT NOT NULL,
 			user_id INTEGER NOT NULL,
@@ -83,7 +85,7 @@ func SelectUser(email string) (types.User, error) {
 	conn := connectToDB()
 	defer conn.Close()
 
-	rows, err := conn.Query("SELECT * FROM users WHERE email = ?;", email)
+	rows, err := conn.Query("SELECT * FROM users WHERE email = $1", email)
 	if err != nil {
 		return types.User{}, err
 	}
@@ -109,20 +111,17 @@ func InsertUser(firstName string, lastName string, email string, password string
 	conn := connectToDB()
 	defer conn.Close()
 
-	res, err := conn.Exec(`
+	var userId int64
+	err := conn.QueryRow(`
 		INSERT INTO users (first_name, last_name, email, password, sex, date_joined)
-		VALUES(?, ?, ?, ?, ?, ?);
-	`, firstName, lastName, email, password, sex, currentTime)
+		VALUES($1, $2, $3, $4, $5, $6) RETURNING id
+	`, firstName, lastName, email, password, sex, currentTime).Scan(&userId)
 	if err != nil {
+		fmt.Println(err)
 		return 0, errors.New("conflict")
 	}
 
-	id, err := res.LastInsertId()
-	if err != nil {
-		panic("could not get id of inserted user")
-	}
-
-	return id, nil
+	return userId, nil
 }
 
 func DeleteTestUser() error {
@@ -131,7 +130,7 @@ func DeleteTestUser() error {
 
 	_, err := conn.Exec(`
 		DELETE FROM users
-		WHERE email = 'test@email.com';
+		WHERE email = 'test@email.com'
 	`)
 	if err != nil {
 		return err
@@ -147,7 +146,7 @@ func InsertFlightOffer(user_id int64, body string) error {
 
 	_, err := conn.Exec(`
 		INSERT INTO flight_offers (date_saved, offer, user_id)
-		VALUES(?, ?, ?);
+		VALUES($1, $2, $3);
 	`, currentTime, body, user_id)
 	if err != nil {
 		return err
@@ -160,7 +159,7 @@ func SelectFlightOffers(user_id int64) ([]types.StoredOffer, error) {
 	conn := connectToDB()
 	defer conn.Close()
 
-	rows, err := conn.Query("SELECT * FROM flight_offers WHERE user_id = ?;", user_id)
+	rows, err := conn.Query("SELECT * FROM flight_offers WHERE user_id = $1;", user_id)
 	if err != nil {
 		return nil, err
 	}
@@ -189,7 +188,7 @@ func SelectFlightOffer(offer_id int64, user_id int64) (types.Offer, error) {
 	defer conn.Close()
 
 	rows, err := conn.Query(
-		"SELECT * FROM flight_offers WHERE offer_id = ? AND user_id = ?;",
+		"SELECT * FROM flight_offers WHERE offer_id = $1 AND user_id = $2;",
 		offer_id, user_id)
 	if err != nil {
 		return types.Offer{}, err

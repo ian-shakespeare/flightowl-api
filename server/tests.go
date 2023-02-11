@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/arcticstorm9/flightowl-api/database"
-	"github.com/arcticstorm9/flightowl-api/helpers"
+	"flightowl-api/database"
+	"flightowl-api/helpers"
 )
 
 type TestCredentials struct {

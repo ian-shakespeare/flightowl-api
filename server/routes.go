@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/arcticstorm9/flightowl-api/helpers"
+	"flightowl-api/helpers"
 )
 
 type route struct {

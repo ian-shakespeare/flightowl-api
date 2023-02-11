@@ -6,14 +6,14 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/arcticstorm9/flightowl-api/database"
-	"github.com/arcticstorm9/flightowl-api/server"
+	"flightowl-api/database"
+	"flightowl-api/server"
 )
 
 func main() {
 	err := database.Init()
 	if err != nil {
-		panic("could not create database")
+		panic(err)
 	}
 
 	mux := http.NewServeMux()

@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/arcticstorm9/flightowl-api/database"
+	"flightowl-api/database"
 )
 
 type OffersRequest struct {

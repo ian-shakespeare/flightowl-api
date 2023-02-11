@@ -3,6 +3,7 @@ package helpers
 import (
 	"crypto/rand"
 	"crypto/sha256"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -67,4 +68,12 @@ func ClearWhiteSpace(word string) string {
 		}
 	}
 	return string(newWord)
+}
+
+func GetRequiredEnv(k string) string {
+	v := os.Getenv(k)
+	if v == "" {
+		panic("missing required environment variable")
+	}
+	return v
 }

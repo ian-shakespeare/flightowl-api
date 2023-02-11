@@ -6,9 +6,9 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/arcticstorm9/flightowl-api/database"
-	"github.com/arcticstorm9/flightowl-api/helpers"
-	"github.com/arcticstorm9/flightowl-api/types"
+	"flightowl-api/database"
+	"flightowl-api/helpers"
+	"flightowl-api/types"
 )
 
 type Credentials struct {
