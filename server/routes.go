@@ -74,8 +74,21 @@ func getMatchingRoute(r *http.Request, path string) (route, error) {
 	return route{}, errors.New("not found")
 }
 
+func enableCORS(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+	(*w).Header().Set("Access-Control-Allow-Credentials", "true")
+	(*w).Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	(*w).Header().Set("Access-Control-Allow-Methods", "POST, GET, DELETE")
+}
+
 func AssignRoutes(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("%s %s %s ", helpers.GetFormattedTime(time.Now()), r.Method, r.URL.Path)
+
+	enableCORS(&w)
+	if r.Method == "OPTIONS" {
+		handleOK(w)
+		return
+	}
 
 	currentRoute, err := getMatchingRoute(r, r.URL.Path)
 	if err != nil {
