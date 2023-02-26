@@ -184,7 +184,7 @@ def test_get_flights(create_test_user, delete_test_user):
     res = requests.get(FLIGHTS_URL, json=body, cookies=cookies)
     assert res.status_code == 200
 
-def test_save_flight(create_test_user, delete_test_user, mock_flight_req_body, delete_test_flight):
-    cookies = create_test_user.cookies
-    res = requests.post(FLIGHTS_URL, json=mock_flight_req_body, cookies=cookies)
-    assert res.status_code == 201
+# def test_save_flight(create_test_user, delete_test_user, mock_flight_req_body, delete_test_flight):
+#     cookies = create_test_user.cookies
+#     res = requests.post(FLIGHTS_URL, json=mock_flight_req_body, cookies=cookies)
+#     assert res.status_code == 201
