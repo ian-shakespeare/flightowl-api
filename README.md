@@ -5,7 +5,7 @@ By Ian Shakespeare
 ## Requirements
 
 - Go v1.19 or later
-- `.env` with `DB_URL`, `API_KEY`, and `API_SECRET` fields
+- `.env` with `DATABASE_URL`, `API_KEY`, and `API_SECRET` fields
 
 ## Routes
 

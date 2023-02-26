@@ -14,7 +14,7 @@ import (
 )
 
 func connectToDB() *sql.DB {
-	dbURL := helpers.GetRequiredEnv("DB_URL")
+	dbURL := helpers.GetRequiredEnv("DATABASE_URL")
 
 	conn, err := sql.Open("postgres", dbURL)
 	if err != nil {
