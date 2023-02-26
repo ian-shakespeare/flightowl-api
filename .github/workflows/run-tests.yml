@@ -14,6 +14,7 @@ jobs:
       API_KEY: ${{ secrets.API_KEY }}
       API_SECRET: ${{ secrets.API_SECRET }}
       TESTING_KEY: ${{ secrets.TESTING_KEY }}
+      DB_URL: ${{ secrets.DB_URL }}
     steps:
     - uses: actions/checkout@v3
     - name: Build Docker image
