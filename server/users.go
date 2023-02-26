@@ -100,8 +100,9 @@ func authenticateUser(w http.ResponseWriter, r *http.Request) {
 
 	sessionId := createSession(user.UserId)
 	cookie := http.Cookie{
-		Name:  "sessionId",
-		Value: sessionId,
+		Name:     "sessionId",
+		Value:    sessionId,
+		SameSite: http.SameSiteNoneMode,
 	}
 	http.SetCookie(w, &cookie)
 
