@@ -63,8 +63,9 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 
 	sessionId := createSession(id)
 	cookie := http.Cookie{
-		Name:  "sessionId",
-		Value: sessionId,
+		Name:     "sessionId",
+		Value:    sessionId,
+		SameSite: http.SameSiteNoneMode,
 	}
 	http.SetCookie(w, &cookie)
 
