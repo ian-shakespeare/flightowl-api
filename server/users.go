@@ -68,6 +68,7 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 		Secure:   true,
 		SameSite: http.SameSiteNoneMode,
 		Path:     "/",
+		Domain:   "localhost",
 	}
 	http.SetCookie(w, &cookie)
 
@@ -107,6 +108,7 @@ func authenticateUser(w http.ResponseWriter, r *http.Request) {
 		Secure:   true,
 		SameSite: http.SameSiteNoneMode,
 		Path:     "/",
+		Domain:   "localhost",
 	}
 	http.SetCookie(w, &cookie)
 
