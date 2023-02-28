@@ -16,6 +16,10 @@ type Credentials struct {
 	Password string
 }
 
+type SessionInfo struct {
+	SessionId string `json:"sessionId"`
+}
+
 func getAllUsers(w http.ResponseWriter, r *http.Request) {
 	_, err := loadSession(r)
 	if err != nil {
@@ -62,16 +66,8 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sessionId := createSession(id)
-	cookie := http.Cookie{
-		Name:     "sessionId",
-		Value:    sessionId,
-		Secure:   true,
-		SameSite: http.SameSiteNoneMode,
-		Path:     "/",
-	}
-	http.SetCookie(w, &cookie)
-
-	handleCreated(w)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(SessionInfo{SessionId: sessionId})
 }
 
 func authenticateUser(w http.ResponseWriter, r *http.Request) {
@@ -101,14 +97,6 @@ func authenticateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sessionId := createSession(user.UserId)
-	cookie := http.Cookie{
-		Name:     "sessionId",
-		Value:    sessionId,
-		Secure:   true,
-		SameSite: http.SameSiteNoneMode,
-		Path:     "/",
-	}
-	http.SetCookie(w, &cookie)
-
-	handleCreated(w)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(SessionInfo{SessionId: sessionId})
 }
