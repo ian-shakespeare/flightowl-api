@@ -20,21 +20,36 @@ type SessionInfo struct {
 	SessionId string `json:"sessionId"`
 }
 
-func getAllUsers(w http.ResponseWriter, r *http.Request) {
-	_, err := loadSession(r)
+type SafeUserData struct {
+	FirstName  string `json:"firstName"`
+	LastName   string `json:"lastName"`
+	Email      string `json:"email"`
+	Sex        string `json:"sex"`
+	DateJoined string `json:"dateJoined"`
+}
+
+func getUser(w http.ResponseWriter, r *http.Request) {
+	id, err := loadSession(r)
 	if err != nil {
 		handleUnauthorized(w)
 		return
 	}
 
-	users, err := database.SelectAllUsers()
+	user, err := database.SelectUser(id)
 	if err != nil {
 		handleNotFound(w)
 		return
 	}
 
+	var safeUser SafeUserData
+	safeUser.FirstName = user.FirstName
+	safeUser.LastName = user.LastName
+	safeUser.Email = user.Email
+	safeUser.Sex = user.Sex
+	safeUser.DateJoined = user.DateJoined
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(users)
+	json.NewEncoder(w).Encode(safeUser)
 
 	handleOK(w)
 }
@@ -92,7 +107,7 @@ func authenticateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := database.SelectUser(credentials.Email)
+	user, err := database.SelectUserByEmail(credentials.Email)
 	if err != nil {
 		fmt.Println(err)
 		handleNotFound(w)

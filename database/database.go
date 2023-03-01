@@ -58,30 +58,28 @@ func Init() error {
 	return nil
 }
 
-func SelectAllUsers() ([]types.User, error) {
+func SelectUser(id int64) (types.User, error) {
 	conn := connectToDB()
 	defer conn.Close()
 
-	rows, err := conn.Query("SELECT * FROM users;")
+	rows, err := conn.Query("SELECT * FROM users WHERE id = $1;", id)
 	if err != nil {
-		return nil, err
+		return types.User{}, err
 	}
 	defer rows.Close()
 
-	users := []types.User{}
-	for rows.Next() {
-		user := types.User{}
+	user := types.User{}
+	if rows.Next() {
 		err = rows.Scan(&user.UserId, &user.FirstName, &user.LastName, &user.Email, &user.Password, &user.Sex, &user.DateJoined, &user.Admin)
 		if err != nil {
-			return nil, err
+			return types.User{}, err
 		}
-		users = append(users, user)
 	}
 
-	return users, nil
+	return user, nil
 }
 
-func SelectUser(email string) (types.User, error) {
+func SelectUserByEmail(email string) (types.User, error) {
 	conn := connectToDB()
 	defer conn.Close()
 
