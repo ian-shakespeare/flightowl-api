@@ -66,8 +66,16 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sessionId := createSession(id)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(SessionInfo{SessionId: sessionId})
+	cookie := http.Cookie{
+		Name:     "sessionId",
+		Value:    sessionId,
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
+		Path:     "/",
+	}
+	http.SetCookie(w, &cookie)
+
+	handleCreated(w)
 }
 
 func authenticateUser(w http.ResponseWriter, r *http.Request) {
@@ -97,6 +105,14 @@ func authenticateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sessionId := createSession(user.UserId)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(SessionInfo{SessionId: sessionId})
+	cookie := http.Cookie{
+		Name:     "sessionId",
+		Value:    sessionId,
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
+		Path:     "/",
+	}
+	http.SetCookie(w, &cookie)
+
+	handleCreated(w)
 }
