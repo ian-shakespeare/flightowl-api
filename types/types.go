@@ -13,11 +13,11 @@ type AccessToken struct {
 
 type User struct {
 	UserId     int64
-	FirstName  string
-	LastName   string
-	Email      string
-	Password   string
-	Sex        string
+	FirstName  string `json:"firstName"`
+	LastName   string `json:"lastName"`
+	Email      string `json:"email"`
+	Password   string `json:"password"`
+	Sex        string `json:"sex"`
 	DateJoined string
 	Admin      int64
 }
