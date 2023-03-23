@@ -31,7 +31,7 @@ func getFlights(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(body)
+	fmt.Println(string(body))
 
 	var offerFields OffersRequest
 	err = json.Unmarshal(body, &offerFields)
