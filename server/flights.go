@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 
@@ -24,6 +25,8 @@ func getFlights(w http.ResponseWriter, r *http.Request) {
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
+		fmt.Println("could not read body")
+		fmt.Println(err)
 		handleBadRequest(w)
 		return
 	}
@@ -31,6 +34,8 @@ func getFlights(w http.ResponseWriter, r *http.Request) {
 	var offerFields OffersRequest
 	err = json.Unmarshal(body, &offerFields)
 	if err != nil {
+		fmt.Println("could not unmarshal body")
+		fmt.Println(err)
 		handleBadRequest(w)
 		return
 	}
@@ -41,6 +46,8 @@ func getFlights(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err.Error() {
 		case "bad request":
+			fmt.Println("bad amadeus request")
+			fmt.Println(err)
 			handleBadRequest(w)
 			return
 		case "not found":
