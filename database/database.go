@@ -13,20 +13,19 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func connectToDB() *sql.DB {
+func getConn() *sql.DB {
 	dbURL := helpers.GetRequiredEnv("DATABASE_URL")
 
 	conn, err := sql.Open("postgres", dbURL)
 	if err != nil {
-		fmt.Println("could not connect to database")
 		panic(err)
 	}
 
 	return conn
 }
 
-func Init() error {
-	conn := connectToDB()
+func Initialize() error {
+	conn := getConn()
 	defer conn.Close()
 
 	_, err := conn.Exec(`
@@ -59,7 +58,7 @@ func Init() error {
 }
 
 func SelectUser(id int64) (types.User, error) {
-	conn := connectToDB()
+	conn := getConn()
 	defer conn.Close()
 
 	rows, err := conn.Query("SELECT * FROM users WHERE id = $1;", id)
@@ -80,7 +79,7 @@ func SelectUser(id int64) (types.User, error) {
 }
 
 func SelectUserByEmail(email string) (types.User, error) {
-	conn := connectToDB()
+	conn := getConn()
 	defer conn.Close()
 
 	rows, err := conn.Query("SELECT * FROM users WHERE email = $1", email)
@@ -106,7 +105,7 @@ func SelectUserByEmail(email string) (types.User, error) {
 
 func InsertUser(firstName string, lastName string, email string, password string, sex string) (int64, error) {
 	currentTime := helpers.GetFormattedTime(time.Now())
-	conn := connectToDB()
+	conn := getConn()
 	defer conn.Close()
 
 	var userId int64
@@ -123,7 +122,7 @@ func InsertUser(firstName string, lastName string, email string, password string
 }
 
 func DeleteTestUser() error {
-	conn := connectToDB()
+	conn := getConn()
 	defer conn.Close()
 
 	_, err := conn.Exec(`
@@ -139,7 +138,7 @@ func DeleteTestUser() error {
 
 func InsertFlightOffer(user_id int64, body string) error {
 	currentTime := helpers.GetFormattedTime(time.Now())
-	conn := connectToDB()
+	conn := getConn()
 	defer conn.Close()
 
 	_, err := conn.Exec(`
@@ -154,7 +153,7 @@ func InsertFlightOffer(user_id int64, body string) error {
 }
 
 func SelectFlightOffers(user_id int64) ([]types.StoredOffer, error) {
-	conn := connectToDB()
+	conn := getConn()
 	defer conn.Close()
 
 	rows, err := conn.Query("SELECT * FROM flight_offers WHERE user_id = $1;", user_id)
@@ -182,7 +181,7 @@ func SelectFlightOffers(user_id int64) ([]types.StoredOffer, error) {
 }
 
 func SelectFlightOffer(offer_id int64, user_id int64) (types.Offer, error) {
-	conn := connectToDB()
+	conn := getConn()
 	defer conn.Close()
 
 	rows, err := conn.Query(
@@ -210,7 +209,7 @@ func SelectFlightOffer(offer_id int64, user_id int64) (types.Offer, error) {
 }
 
 func DeleteTestFlight() error {
-	conn := connectToDB()
+	conn := getConn()
 	defer conn.Close()
 
 	_, err := conn.Exec(`
