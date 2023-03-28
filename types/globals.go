@@ -1,34 +1,5 @@
 package types
 
-type AuthResponse struct {
-	AccessToken string `json:"access_token"`
-	ExpiresIn   int64  `json:"expires_in"`
-}
-
-type AccessToken struct {
-	Value        string
-	Duration     int64
-	TimeReceived int64
-}
-
-type User struct {
-	UserId     int64
-	FirstName  string `json:"firstName"`
-	LastName   string `json:"lastName"`
-	Email      string `json:"email"`
-	Password   string `json:"password"`
-	Sex        string `json:"sex"`
-	DateJoined string
-	Admin      int64
-}
-
-type StoredOffer struct {
-	OfferId     int64           `json:"offer_id"`
-	DateSaved   string          `json:"date_saved"`
-	FlightOffer FlightOfferData `json:"offer"`
-	UserId      int64           `json:"user_id"`
-}
-
 type LocationDate struct {
 	IATACode string `json:"iataCode"`
 	Terminal string `json:"terminal"`
@@ -96,7 +67,7 @@ type TravelerPrice struct {
 	DetailsBySegment []SegmentDetail `json:"fareDetailsBySegment"`
 }
 
-type Offer struct {
+type FlightOffer struct {
 	Type                     string          `json:"type"`
 	Id                       string          `json:"id"`
 	Source                   string          `json:"source"`
@@ -113,16 +84,16 @@ type Offer struct {
 }
 
 type FlightOffersResponse struct {
-	Offers []Offer `json:"data"`
+	Offers []FlightOffer `json:"data"`
 }
 
 type FlightOfferData struct {
-	Data Offer `json:"data"`
+	Data FlightOffer `json:"data"`
 }
 
 type FlightOfferPrice struct {
 	Data struct {
 		Type         string  `json:"type"`
-		FlightOffers []Offer `json:"flightOffers"`
+		FlightOffers []FlightOffer `json:"flightOffers"`
 	} `json:"data"`
 }

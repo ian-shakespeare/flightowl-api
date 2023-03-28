@@ -1,10 +1,12 @@
 package main
 
 import (
-	"flightowl-api/auth"
-	"flightowl-api/database"
 	"strings"
 	"time"
+
+	"flightowl-api/auth"
+	"flightowl-api/database"
+	"flightowl-api/routes"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -39,9 +41,6 @@ func main() {
 
 	r := gin.Default()
 
-	r.Use(gin.Recovery())
-	r.Use(gin.Logger())
-	r.Use(RequireAuth())
 	r.Use(cors.New(cors.Config{
 		AllowOrigins: []string{"https://www.flightowl.app", "https://flightowl.app", "http://localhost:3000"},
 		AllowMethods: []string{"GET", "POST", "PUT", "DELETE"},
@@ -50,12 +49,18 @@ func main() {
 		MaxAge: 12 * time.Hour,	
 	}))
 
-	r.POST("/tokens", auth.GetToken)
+	r.POST("/register", routes.RegisterUser)
+	r.POST("/login", routes.LoginUser)
 
 	authorized := r.Group("/")
 	authorized.Use(RequireAuth())
 	{
 		authorized.GET("/test", testAuth)
+		authorized.GET("/user", routes.GetUser)
+		authorized.GET("/flights/saved", routes.GetSavedFlights)
+		authorized.POST("/flights", routes.GetFlights)
+		authorized.POST("/flights/check", routes.CheckSavedFlight)
+		authorized.POST("/flights/saved", routes.SaveFlight)
 	}
 
 	r.Run(":8000")

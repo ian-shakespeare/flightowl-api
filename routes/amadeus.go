@@ -1,9 +1,10 @@
-package server
+package routes
 
 import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"flightowl-api/types"
 	"fmt"
 	"io"
 	"net/http"
@@ -11,21 +12,31 @@ import (
 	"os"
 	"strings"
 	"time"
-
-	"flightowl-api/types"
 )
+
+type AuthResponse struct {
+	AccessToken string `json:"access_token"`
+	ExpiresIn   int64  `json:"expires_in"`
+}
+
+type AccessToken struct {
+	Value        string
+	Duration     int64
+	TimeReceived int64
+}
+
 
 const baseURL = "https://test.api.amadeus.com"
 
 var apiKey = os.Getenv("API_KEY")
 var apiSecret = os.Getenv("API_SECRET")
-var accessToken = types.AccessToken{Value: "", Duration: 0, TimeReceived: 0}
+var accessToken = AccessToken{Value: "", Duration: 0, TimeReceived: 0}
 
-func isTokenExpired(token *types.AccessToken) bool {
+func isTokenExpired(token *AccessToken) bool {
 	return time.Now().Unix() > token.Duration+token.TimeReceived
 }
 
-func retrieveAccessToken(token *types.AccessToken) error {
+func retrieveAccessToken(token *AccessToken) error {
 	requestURL := baseURL + "/v1/security/oauth2/token"
 
 	formBody := url.Values{}
@@ -50,7 +61,7 @@ func retrieveAccessToken(token *types.AccessToken) error {
 		return err
 	}
 
-	var resBody types.AuthResponse
+	var resBody AuthResponse
 	err = json.Unmarshal(rawResBody, &resBody)
 	if err != nil {
 		return err
@@ -62,7 +73,7 @@ func retrieveAccessToken(token *types.AccessToken) error {
 	return nil
 }
 
-func getFlightOffers(originCode string, destinationCode string, departureDate string, numOfAdults int) ([]types.Offer, error) {
+func getFlightOffers(originCode string, destinationCode string, departureDate string, numOfAdults int) ([]types.FlightOffer, error) {
 	if isTokenExpired(&accessToken) {
 		retrieveAccessToken(&accessToken)
 	}
@@ -104,7 +115,7 @@ func getFlightOffers(originCode string, destinationCode string, departureDate st
 	return offers[:5], nil
 }
 
-func getUpdatedFlightOffer(previousOffer types.Offer) (types.Offer, error) {
+func getUpdatedFlightOffer(previousOffer types.FlightOffer) (types.FlightOffer, error) {
 	if isTokenExpired(&accessToken) {
 		retrieveAccessToken(&accessToken)
 	}
@@ -118,34 +129,34 @@ func getUpdatedFlightOffer(previousOffer types.Offer) (types.Offer, error) {
 
 	reqBody, err := json.Marshal(body)
 	if err != nil {
-		return types.Offer{}, errors.New("bad request")
+		return types.FlightOffer{}, errors.New("bad request")
 	}
 
 	req, err := http.NewRequest(http.MethodPost, requestURL, bytes.NewBuffer(reqBody))
 	if err != nil {
-		return types.Offer{}, errors.New("bad request")
+		return types.FlightOffer{}, errors.New("bad request")
 	}
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", accessToken.Value))
 	req.Header.Set("Content-Type", "application/json")
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return types.Offer{}, errors.New("bad request")
+		return types.FlightOffer{}, errors.New("bad request")
 	}
 
 	rawResBody, err := io.ReadAll(res.Body)
 	if err != nil {
-		return types.Offer{}, errors.New("bad request")
+		return types.FlightOffer{}, errors.New("bad request")
 	}
 
 	var resBody types.FlightOfferPrice
 	err = json.Unmarshal(rawResBody, &resBody)
 	if err != nil {
-		return types.Offer{}, errors.New("bad request")
+		return types.FlightOffer{}, errors.New("bad request")
 	}
 
 	if len(resBody.Data.FlightOffers) < 1 {
-		return types.Offer{}, errors.New("not found")
+		return types.FlightOffer{}, errors.New("not found")
 	}
 
 	return resBody.Data.FlightOffers[0], nil
