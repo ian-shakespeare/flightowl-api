@@ -15,17 +15,6 @@ type SessionInfo struct {
 	SessionId string `json:"sessionId"`
 }
 
-type User struct {
-	UserId     int64
-	FirstName  string `json:"firstName"`
-	LastName   string `json:"lastName"`
-	Email      string `json:"email"`
-	Password   string `json:"password"`
-	Sex        string `json:"sex"`
-	DateJoined string
-	Admin      int64
-}
-
 type SafeUserData struct {
 	FirstName  string `json:"firstName"`
 	LastName   string `json:"lastName"`
@@ -54,6 +43,13 @@ func GetUser(c *gin.Context) {
 }
 
 func RegisterUser(c *gin.Context) {
+	type request struct {
+		FirstName  string `json:"firstName"`
+		LastName   string `json:"lastName"`
+		Email      string `json:"email"`
+		Password   string `json:"password"`
+		Sex        string `json:"sex"`
+	}
 	type response struct {
 		Token string `json:"token"`
 	}
@@ -64,15 +60,15 @@ func RegisterUser(c *gin.Context) {
 		return
 	}
 
-	var user database.User
-	err = json.Unmarshal(body, &user)
+	var req request
+	err = json.Unmarshal(body, &req)
 	if err != nil {
 		c.Status(400)
 		return
 	}
-	user.Password = helpers.HashString(user.Password)
+	req.Password = helpers.HashString(req.Password)
 
-	id, err := database.InsertUser(user.FirstName, user.LastName, user.Email, user.Password, user.Sex)
+	id, err := database.InsertUser(req.FirstName, req.LastName, req.Email, req.Password, req.Sex)
 	if err != nil {
 		switch err.Error() {
 		case "conflict":

@@ -20,7 +20,7 @@ func testAuth(c *gin.Context) {
 func RequireAuth() gin.HandlerFunc {
 	return func (c *gin.Context) {
 		header, exists := c.Request.Header["Authorization"]
-		if !exists {
+		if !exists || len(header) == 0 {
 			c.Status(401)
 			return
 		}
