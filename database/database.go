@@ -13,20 +13,37 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func connectToDB() *sql.DB {
+type User struct {
+	UserId     int64
+	FirstName  string `json:"firstName"`
+	LastName   string `json:"lastName"`
+	Email      string `json:"email"`
+	Password   string `json:"password"`
+	Sex        string `json:"sex"`
+	DateJoined string
+	Admin      int64
+}
+
+type SavedOffer struct {
+	OfferId     int64           `json:"offer_id"`
+	DateSaved   string          `json:"date_saved"`
+	FlightOffer types.FlightOffer `json:"offer"`
+	UserId      int64           `json:"user_id"`
+}
+
+func getConn() *sql.DB {
 	dbURL := helpers.GetRequiredEnv("DATABASE_URL")
 
 	conn, err := sql.Open("postgres", dbURL)
 	if err != nil {
-		fmt.Println("could not connect to database")
 		panic(err)
 	}
 
 	return conn
 }
 
-func Init() error {
-	conn := connectToDB()
+func Initialize() error {
+	conn := getConn()
 	defer conn.Close()
 
 	_, err := conn.Exec(`
@@ -58,47 +75,47 @@ func Init() error {
 	return nil
 }
 
-func SelectUser(id int64) (types.User, error) {
-	conn := connectToDB()
+func SelectUser(id int64) (User, error) {
+	conn := getConn()
 	defer conn.Close()
 
 	rows, err := conn.Query("SELECT * FROM users WHERE id = $1;", id)
 	if err != nil {
-		return types.User{}, err
+		return User{}, err
 	}
 	defer rows.Close()
 
-	user := types.User{}
+	user := User{}
 	if rows.Next() {
 		err = rows.Scan(&user.UserId, &user.FirstName, &user.LastName, &user.Email, &user.Password, &user.Sex, &user.DateJoined, &user.Admin)
 		if err != nil {
-			return types.User{}, err
+			return User{}, err
 		}
 	}
 
 	return user, nil
 }
 
-func SelectUserByEmail(email string) (types.User, error) {
-	conn := connectToDB()
+func SelectUserByEmail(email string) (User, error) {
+	conn := getConn()
 	defer conn.Close()
 
 	rows, err := conn.Query("SELECT * FROM users WHERE email = $1", email)
 	if err != nil {
-		return types.User{}, err
+		return User{}, err
 	}
 	defer rows.Close()
 
-	user := types.User{}
+	user := User{}
 	if rows.Next() {
 		err = rows.Scan(&user.UserId, &user.FirstName, &user.LastName, &user.Email, &user.Password, &user.Sex, &user.DateJoined, &user.Admin)
 		if err != nil {
-			return types.User{}, errors.New("not found")
+			return User{}, errors.New("not found")
 		}
 	}
 
 	if user.Email != email {
-		return types.User{}, errors.New("not found")
+		return User{}, errors.New("not found")
 	}
 
 	return user, nil
@@ -106,7 +123,7 @@ func SelectUserByEmail(email string) (types.User, error) {
 
 func InsertUser(firstName string, lastName string, email string, password string, sex string) (int64, error) {
 	currentTime := helpers.GetFormattedTime(time.Now())
-	conn := connectToDB()
+	conn := getConn()
 	defer conn.Close()
 
 	var userId int64
@@ -123,7 +140,7 @@ func InsertUser(firstName string, lastName string, email string, password string
 }
 
 func DeleteTestUser() error {
-	conn := connectToDB()
+	conn := getConn()
 	defer conn.Close()
 
 	_, err := conn.Exec(`
@@ -139,7 +156,7 @@ func DeleteTestUser() error {
 
 func InsertFlightOffer(user_id int64, body string) error {
 	currentTime := helpers.GetFormattedTime(time.Now())
-	conn := connectToDB()
+	conn := getConn()
 	defer conn.Close()
 
 	_, err := conn.Exec(`
@@ -153,8 +170,8 @@ func InsertFlightOffer(user_id int64, body string) error {
 	return nil
 }
 
-func SelectFlightOffers(user_id int64) ([]types.StoredOffer, error) {
-	conn := connectToDB()
+func SelectFlightOffers(user_id int64) ([]SavedOffer, error) {
+	conn := getConn()
 	defer conn.Close()
 
 	rows, err := conn.Query("SELECT * FROM flight_offers WHERE user_id = $1;", user_id)
@@ -163,16 +180,16 @@ func SelectFlightOffers(user_id int64) ([]types.StoredOffer, error) {
 	}
 	defer rows.Close()
 
-	offers := []types.StoredOffer{}
+	offers := []SavedOffer{}
 	for rows.Next() {
-		var offer types.StoredOffer
+		var offer SavedOffer
 		var rawOfferData string
 		err = rows.Scan(&offer.OfferId, &offer.DateSaved, &rawOfferData, &offer.UserId)
 		if err != nil {
 			return nil, err
 		}
 
-		var offerData types.FlightOfferData
+		var offerData types.FlightOffer
 		json.Unmarshal([]byte(rawOfferData), &offerData)
 		offer.FlightOffer = offerData
 		offers = append(offers, offer)
@@ -181,36 +198,36 @@ func SelectFlightOffers(user_id int64) ([]types.StoredOffer, error) {
 	return offers, nil
 }
 
-func SelectFlightOffer(offer_id int64, user_id int64) (types.Offer, error) {
-	conn := connectToDB()
+func SelectFlightOffer(offer_id int64, user_id int64) (types.FlightOffer, error) {
+	conn := getConn()
 	defer conn.Close()
 
 	rows, err := conn.Query(
 		"SELECT * FROM flight_offers WHERE offer_id = $1 AND user_id = $2;",
 		offer_id, user_id)
 	if err != nil {
-		return types.Offer{}, err
+		return types.FlightOffer{}, err
 	}
 	defer rows.Close()
 
-	storedOffer := types.StoredOffer{}
+	storedOffer := SavedOffer{}
 	if rows.Next() {
 		var rawOfferData string
 		err = rows.Scan(&storedOffer.OfferId, &storedOffer.DateSaved, &rawOfferData, &storedOffer.UserId)
 		if err != nil {
-			return types.Offer{}, err
+			return types.FlightOffer{}, err
 		}
 
-		var offerData types.FlightOfferData
+		var offerData types.FlightOffer
 		json.Unmarshal([]byte(rawOfferData), &offerData)
 		storedOffer.FlightOffer = offerData
 	}
 
-	return storedOffer.FlightOffer.Data, nil
+	return storedOffer.FlightOffer, nil
 }
 
 func DeleteTestFlight() error {
-	conn := connectToDB()
+	conn := getConn()
 	defer conn.Close()
 
 	_, err := conn.Exec(`
