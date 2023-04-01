@@ -27,7 +27,7 @@ type User struct {
 type SavedOffer struct {
 	OfferId     int64           `json:"offer_id"`
 	DateSaved   string          `json:"date_saved"`
-	FlightOffer types.FlightOfferData `json:"offer"`
+	FlightOffer types.FlightOffer `json:"offer"`
 	UserId      int64           `json:"user_id"`
 }
 
@@ -189,7 +189,7 @@ func SelectFlightOffers(user_id int64) ([]SavedOffer, error) {
 			return nil, err
 		}
 
-		var offerData types.FlightOfferData
+		var offerData types.FlightOffer
 		json.Unmarshal([]byte(rawOfferData), &offerData)
 		offer.FlightOffer = offerData
 		offers = append(offers, offer)
@@ -218,12 +218,12 @@ func SelectFlightOffer(offer_id int64, user_id int64) (types.FlightOffer, error)
 			return types.FlightOffer{}, err
 		}
 
-		var offerData types.FlightOfferData
+		var offerData types.FlightOffer
 		json.Unmarshal([]byte(rawOfferData), &offerData)
 		storedOffer.FlightOffer = offerData
 	}
 
-	return storedOffer.FlightOffer.Data, nil
+	return storedOffer.FlightOffer, nil
 }
 
 func DeleteTestFlight() error {

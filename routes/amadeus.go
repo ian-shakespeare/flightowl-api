@@ -109,10 +109,10 @@ func getFlightOffers(originCode string, destinationCode string, departureDate st
 	offers := resBody.Offers
 	if len(offers) < 1 {
 		return nil, errors.New("not found")
-	} else if len(offers) < 5 {
-		return offers[:3], nil
+	} else if len(offers) < 10 {
+		return offers, nil
 	}
-	return offers[:5], nil
+	return offers[:10], nil
 }
 
 func getUpdatedFlightOffer(previousOffer types.FlightOffer) (types.FlightOffer, error) {
