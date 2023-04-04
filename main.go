@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -63,5 +65,9 @@ func main() {
 		authorized.POST("/flights/saved", routes.SaveFlight)
 	}
 
-	r.Run(":8000")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8000"
+	}
+	r.Run(fmt.Sprintf(":%s", port))
 }
