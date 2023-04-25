@@ -2,23 +2,21 @@
 
 By Ian Shakespeare
 
-## Requirements
+## Description
 
-- Go v1.19 or later
-- `.env` with `DATABASE_URL`, `API_KEY`, and `API_SECRET` fields
+The API server for [FlightOwl](https://www.flightowl.app). Database management is handled by the `database` module. `auth` manages token generation and validation. All routes are defined in the `routes` module.
 
 ## Routes
 
 | METHOD | ROUTE |
 |---|---|
-| GET | /users |
-| GET | /flights |
+| POST | /register |
+| POST | /login |
+| GET | /user |
 | GET | /flights/saved |
-| GET | /flights/check |
-| POST | /users |
-| POST | /sessions |
 | POST | /flights |
-| DELETE | /tests |
+| POST | /flights/check |
+| POST | /flights/saved |
 
 ## Schema
 
@@ -34,7 +32,6 @@ CREATE TABLE IF NOT EXISTS users
     date_joined TEXT NOT NULL,
     admin INTEGER DEFAULT 0 NOT NULL
 );
-
 CREATE TABLE IF NOT EXISTS flight_offers
 (
     offer_id SERIAL PRIMARY KEY,
@@ -43,5 +40,10 @@ CREATE TABLE IF NOT EXISTS flight_offers
     user_id INTEGER NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
         ON DELETE CASCADE
-);;
+);
 ```
+
+## Requirements
+
+- Go v1.19 or later
+- `.env` with `DATABASE_URL`, `API_KEY`, and `API_SECRET` fields
