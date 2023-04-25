@@ -14,11 +14,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func testAuth(c *gin.Context) {
-	userId := c.MustGet("UserId").(int64)
-	c.JSON(200, userId)
-}
-
 func RequireAuth() gin.HandlerFunc {
 	return func (c *gin.Context) {
 		header, exists := c.Request.Header["Authorization"]
@@ -57,7 +52,6 @@ func main() {
 	authorized := r.Group("/")
 	authorized.Use(RequireAuth())
 	{
-		authorized.GET("/test", testAuth)
 		authorized.GET("/user", routes.GetUser)
 		authorized.GET("/flights/saved", routes.GetSavedFlights)
 		authorized.POST("/flights", routes.GetFlights)
